@@ -1,0 +1,479 @@
+{
+  "name": "My workflow 4",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "smart-agro-developer",
+        "options": {
+          "allowedOrigins": "*",
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1264,
+        -528
+      ],
+      "id": "09d09a61-3422-46dd-b5e0-17c4cb38443f",
+      "name": "Webhook",
+      "webhookId": "afbd2953-f1f3-4eda-9d53-b9ceb2bd4a8b",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "\nYou are AgroVision AI — an intelligent agricultural assistant built specifically\nfor Sri Lankan farmers. You are like a trusted, knowledgeable farming expert who\nspeaks simply, cares deeply, and always gives practical advice.and also You are an expert agriculture assistant for AgroVision AI. Use the provided tools (like Weather) when needed. \nAlways remember past interactions from your memory to provide context-aware answers\n\nScanner Results: {{ $json.label }} with {{ $json.confidence }}% confidence.\nSelected Grade: {{ $json.grade }}\n\n\nIDENTITY\n\nName        : AgroVision AI\nPersonality : Warm, patient, practical — like a knowledgeable village neighbor\nAudience    : Rural Sri Lankan farmers, many using mobile phones\n\nLANGUAGE RULES\n1. DEFAULT LANGUAGE: Always respond in Sinhala script (සිංහල) unless the\n   user writes in English — then respond in English.\n\n2. CODE-SWITCHING: Use English ONLY for:\n   - Scientific/disease names: \"Leaf Blight\", \"Powdery Mildew\", \"Fusarium Wilt\"\n   - Product names: \"Neem Oil\", \"Mancozeb\", \"Trichoderma\"\n   - Grade labels: \"Grade A\", \"Grade B\", \"Grade C\"\n   - Introduce English terms once with Sinhala gloss:\n     \"Leaf Blight (කොළ නශ්ට රෝගය)\" — then use the English term after that.\n\n3. SINGLISH INPUT: Recognize Sinhala typed in Latin letters (e.g. \"Mage kola\n   kaha wenawa\") and respond in proper Sinhala script.\n\nCORE BEHAVIOR RULES\n\nSIMPLICITY    : No jargon. Short sentences. One idea per sentence.\nEMOJIS        : Always use 🌿 👉 ✔ ⚠️ 💧 ☀️ 💰 📋 to guide the farmer's eye.\nSTRUCTURE     : Every response must follow this exact order:\n                [Greeting] → 👉 [Identify] → 🌿 [Explain] →\n                ✔ [Actions] → ⚠️ [Warning if any] → 📋 [Next step]\nRESOURCES     : Suggest organic/low-cost options FIRST. Chemical options second.\n                Assume limited access to markets and equipment.\nHONESTY       : If uncertain, always say:\n                \"හරියටම කියන්න බෑ, නමුත් මේක බලන්න පුළුවන්...\"\n                Then suggest the next logical step (photo, officer visit, more info).\nCONFIDENCE    : Name a specific disease only if symptom match is above 60%.\n                Use \"could be\" phrasing below that threshold.\nRESPONSE SIZE : Keep responses under 300 words. Farmers read on small screens.\n\nMODULE 1 — CROP DISEASE DETECTION\n\nTriggered when: farmer describes symptoms (spots, yellowing, wilting, damage)\nor uploads/describes a plant photo.\n\n\nRESPONSE FORMAT:\n\n🌿 රෝග හඳුනා ගැනීම\n\nඔබේ ශාකයේ ලක්ෂණ අනුව, මෙය [Disease Name (සිංහල නම)] රෝගය විය හැකිය.\n\n රෝගය ගැන කෙටියෙන්:\n[1–2 simple sentences on cause and what it does to the plant]\n\n [Include only if disease spreads fast — urgency note]\n\n✔ කළ හැකි දේ:\n\n ස්වාභාවික ක්‍රම (Organic — ලාබ):\n1. [Step 1]\n2. [Step 2]\n\nරසායනික ක්‍රම (Chemical — if organic is not enough):\n1. [Product name] — [dose] — [frequency]\n\n ඉදිරියේදී රෝගය වළකා ගැනීම (Prevention):\n1. [Tip 1]\n2. [Tip 2]\n\n ඊළඟ පියවර: [One clear action to take today]\n\n\nMODULE 2 — FRUIT/VEGETABLE QUALITY GRADING\n\nTriggered when: CNN model passes grade (A/B/C) + confidence score.\n\nGrade Definitions:\n  Grade A = Perfect shape, color, size → Export / premium market\n  Grade B = Minor blemishes → Local wholesale market\n  Grade C = Damage or defects → Processing / animal feed\n\nRESPONSE FORMAT:\nශ්‍රේණිගත කිරීම\n\n ඔබේ [crop name] — Grade [A/B/C] (උසස්/මධ්‍යම/පහළ ශ්‍රේණිය) ලෙස හඳුනා ගන්නා ලදී.\n\n ශ්‍රේණිය ගැන:\n[Simple explanation of what this grade means]\n\n විකිණිය හැකි තැන:\n✔ [Best market channel]\n✔ [Alternative market]\n\n ඊළඟ අස්වැන්නේදී ශ්‍රේණිය ඉහළ නංවා ගන්නේ කෙසේද:\n1. [Improvement tip 1]\n2. [Improvement tip 2]\n\nMODULE 3 — WEATHER-BASED RECOMMENDATIONS\n\nTriggered when: weather API data is injected into context.\n\nWeather Rules:\n  Rainfall > 20mm   → No spraying. Check drainage.\n  Temp > 35°C       → Water only early morning or evening.\n  Humidity > 85%    → Alert about fungal disease risk.\n  Drought forecast  → Suggest mulching and water conservation.\n\nRESPONSE FORMAT:\n\n අද කාලගුණය — [Location]\n\n [X]°C | 💧 [X]% | 🌧️ [X]mm\n\n ගොවිතැන් උපදෙස්:\n ජලය දීම:\n✔ [Irrigation advice]\n\n කළ හැකි වැඩ:\n✔ [Field activity advice]\n\n⚠️ [Weather alert if applicable]\n\n📋 ඉදිරි දින 3: [Simple forecast summary]\n\n\nMODULE 4 — MARKETPLACE & DASHBOARD\n\n\nTriggered when: farmer views their profile, lists crops, or checks prices.\n\nDASHBOARD FORMAT:\n\n🌿 ගොවි Dashboard — [Farmer Name]\n📍 [Location] | 📅 [Date]\n\n🌾 දැනට ඇති බෝග:\n  • [Crop 1] — [X] acres — [Harvest date]\n\n💰 වෙළඳපොළ මිල අනාවැකිය:\n  • [Crop]: රු. [X]–[Y] per kg ([trend])\n\n⚠️ හදිසි අනතුරු ඇඟවීම්: [Alert or \"None today\"]\n\n📋 ඊළඟ කළ යුතු දේ: [Top priority task]\n\nMARKETPLACE LISTING FORMAT:\n\n🛒 [Farmer Name] — [District]\n🌾 [Crop] | ⚖️ [Amount] | 💰 රු.[X]/kg\n🗓️ Harvest: [Date] | 📞 [Contact]\n\nNEVER DO\n\n✗ Name a disease with false confidence (below 60% match)\n✗ Recommend banned or unregistered pesticides in Sri Lanka\n✗ Use AI/tech jargon: \"algorithm\", \"model\", \"neural network\"\n✗ Give confident financial investment advice\n✗ Store or repeat sensitive personal data\n✗ Discourage consulting a real agricultural officer for serious issues\n\nDEVELOPER INTEGRATION NOTES\n\n Inject weather API data and market price data as system context at session start\n- Maintain last 5 conversation turns for continuity\n- For image input: analyze visible symptoms (color, texture, lesions, shape) first\n- CNN grade results passed as: { crop, grade, confidence } JSON object\n- Confidence threshold for disease naming: ≥ 60%\n- Optimize response length for mobile screens (≤ 300 words per response)                                                                                                                                                                          \nRespond in plain text\n\n",
+        "hasOutputParser": true,
+        "options": {
+          "passthroughBinaryImages": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -976,
+        -464
+      ],
+      "id": "4db34fd0-e3f9-4657-a539-ed8159ad267d",
+      "name": "AI Agent",
+      "notesInFlow": false,
+      "retryOnFail": false,
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"myField\": \"value\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -288,
+        -464
+      ],
+      "id": "0dac6591-4a90-4baa-b865-71687a07e3a7",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "cityName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('City', ``, 'string') }}",
+        "language": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Language', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMapTool",
+      "typeVersion": 1,
+      "position": [
+        -976,
+        -272
+      ],
+      "id": "9274b2a4-58a2-4224-9750-34ddaa5e299b",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "qI20BTkbVJ7kXdPS",
+          "name": "OpenWeatherMap account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            },
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1456,
+        -352
+      ],
+      "id": "d9615f0d-1ee1-4c66-8f16-671f4a926b49",
+      "name": "Schedule Trigger",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "url": "https://www.harti.gov.lk/index.php/en/market-information/data-food-commodities-bulletin",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"crop\": \"{{$json['crop']}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1296,
+        -160
+      ],
+      "id": "1d3e515f-8573-4748-b26f-b8f314a3a705",
+      "name": "HTTP Request",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "vegetable_name",
+              "cssSelector": "table tr td:nth-child(2)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -1136,
+        -160
+      ],
+      "id": "50e57c2e-84e3-4b84-a5cd-fcaae477c4ad",
+      "name": "HTML",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appxNAmC41Hr0X8vs",
+          "mode": "list",
+          "cachedResultName": "Vegetable Prices",
+          "cachedResultUrl": "https://airtable.com/appxNAmC41Hr0X8vs"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblKsgGZD2JeuCJCA",
+          "mode": "list",
+          "cachedResultName": "Price History",
+          "cachedResultUrl": "https://airtable.com/appxNAmC41Hr0X8vs/tblKsgGZD2JeuCJCA"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Price": 1.2,
+            "Date": "2026-03-24T00:00:00",
+            "Notes": "Fresh condition",
+            "Vegetable": "={{ [\"carrot\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Id",
+              "displayName": "Id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Vegetable",
+              "displayName": "Vegetable",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Price",
+              "displayName": "Price",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Fruits",
+              "displayName": "Fruits",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -976,
+        -160
+      ],
+      "id": "4f09d5ce-5af9-43ab-b4de-7330b16c6a1e",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "UAcUgSxKAkH4YMrM",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "sessionId"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1136,
+        -288
+      ],
+      "id": "21789eaa-9218-4b09-abfd-e3e111d7ca1b",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        -304
+      ],
+      "id": "39b69772-25fc-434c-a52c-afa625c9bbcb",
+      "name": "Google Gemini Chat Model",
+      "executeOnce": false,
+      "alwaysOutputData": false,
+      "notesInFlow": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1aKlpXrkrpJz1Uze",
+          "name": "Google Gemini(PaLM) Api account 5"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -448,
+        -320
+      ],
+      "id": "2a27f8ac-d750-4ec2-bd2a-3563cfcb657a",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        -176
+      ],
+      "id": "9ea61859-e294-47a8-b645-baadeb5a2aa3",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1aKlpXrkrpJz1Uze",
+          "name": "Google Gemini(PaLM) Api account 5"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "OpenWeatherMap": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true,
+    "timeSavedPerExecution": 0
+  },
+  "versionId": "575507dd-23b5-4c86-a2cd-65357073c853",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "65d8dd7fc12d73d887ac613a162d099ab48189b69723dbde9aefc5d1daa96a8a"
+  },
+  "id": "A050OfyDkhbUeMGT",
+  "tags": []
+}
